@@ -12,6 +12,10 @@ BT pin: 201272
 Serial (115200)
 
 Have BT Serial message in terminal bluetooth app for detailed code
+
+("A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical"); set choice mode
+
+("B-2,C-3,D-4,E-5,F-6,G-7: Horizontal"); - set speed bruteforce
 # Gallery
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/7e077796-9fe4-49f7-bda6-f639aed3240f)
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/2c8921cb-82dd-4dde-a16b-2b0e51b48dd7)
