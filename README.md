@@ -13,7 +13,7 @@ Serial (115200)
 
 Have BT Serial message in terminal bluetooth app for detailed code
 
-Set choice mode - ("A-Sniff,B-Nice,C-Came,D-AN-Motors: Vertical"); 
+Set choice mode - (B-Sniff,C-Nice,D-Came: Vertical)
 
 Set speed bruteforce - ("B-2,C-3,D-4,E-5,F-6,G-7: Horizontal"); Higher - slow
 
