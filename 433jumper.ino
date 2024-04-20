@@ -50,7 +50,6 @@ struct {
 
 #include "BluetoothSerial.h"
 BluetoothSerial SerialBT; // Объект для Bluetooth
-const char *pin = "201272"; // PAssword BT Serial
 
 #include <RCSwitch.h>
 RCSwitch mySwitch = RCSwitch();
@@ -58,30 +57,30 @@ RCSwitch mySwitch = RCSwitch();
 long value;
 int bitlength;
 int protocol;
-int pulselength; 
-int txPin = 32;  // Передатчик
-int rxPin = 33; // Приемник
+int pulselength;
+int incoming;
+#define txPin 32  // Передатчик
+#define rxPin 33 // Приемник
 int speeds = 4;
-int on_off_flag = 0;
-int on_off_flag_b = 0;
-
+unsigned int freq;
 
 #define pulseAN 412                     // длительность импульса AN-Motors
 //AN MOTORS
 volatile long c1 = 0;                   // переменная для отправки
 volatile long c2 = 0;                   // переменная для отправки
 
+
+
 void setup()
 {
-  RemoteXY_Init ();
+  pinMode(txPin, OUTPUT);
+  RemoteXY_Init();
   Serial.begin(115200);
   SerialBT.begin("IPhone(Egor)");
-  SerialBT.setPin(pin);
-  pinMode(txPin, OUTPUT);
-  on_off_flag = 0;
-  on_off_flag_b = 0;
   speeds = 4;
+  freq = 1000;
   mySwitch.enableReceive(rxPin);
+  mySwitch.enableTransmit(txPin);
   Serial.println("A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical");
   SerialBT.println("A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical");
   char str[] = "A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical";
@@ -141,18 +140,37 @@ void loop ()
       break;
   }
   if(RemoteXY.btglush!=0) {
-    if(on_off_flag == 0) {
-      tone(txPin, 1000);
-      on_off_flag = 1;
-    }
-    on_off_flag_b = 0;
+    tone(txPin, freq);
+    char str[] = "Jummer ON!";
+    sprintf(RemoteXY.text_01, "%s Freq is: %d Hz", str, freq);
   }
   else {
-    if(on_off_flag_b == 0) {
-      tone(txPin, 0);
-      on_off_flag_b = 1;
+    noTone(txPin);
+  }
+  restarts();
+}
+
+void restarts()
+{
+  if (SerialBT.available()) // Проверяем, не получили ли мы что-либо от Bluetooth модуля
+  {
+    incoming = SerialBT.read(); // Читаем, что получили
+    if (incoming == 33)  // Если значение равно !
+    {
+      ESP.restart();
     }
-    on_off_flag = 0;
+    if (incoming == 43)  // Если значение равно +
+    {
+      freq=freq+1000;
+      SerialBT.print("JM:Freq+:  ");
+      SerialBT.println(freq);
+    }
+    if (incoming == 45)  // Если значение равно -
+    {
+      freq=freq-1000;
+      SerialBT.print("JM:Freq-:  ");
+      SerialBT.println(freq);
+    }  
   }
 }
 
@@ -162,23 +180,23 @@ void send()
   mySwitch.setPulseLength(pulselength);
   mySwitch.send(value, bitlength);
   mySwitch.send(value, bitlength);
-  delay(1);
+  RemoteXY_delay(1);
   char str[] = "Send";
   sprintf(RemoteXY.text_01, "%s value %d bit: %d protocol: %d pulse: %d", str, value,bitlength,protocol,pulselength);
 }
 
 void priem()
 {
-if (mySwitch.available()) {
-      value = mySwitch.getReceivedValue();
-      bitlength = mySwitch.getReceivedBitlength();
-      protocol = mySwitch.getReceivedProtocol();
-      pulselength = mySwitch.getReceivedDelay();
-      output(mySwitch.getReceivedValue(), mySwitch.getReceivedBitlength(), mySwitch.getReceivedDelay(), mySwitch.getReceivedRawdata(),mySwitch.getReceivedProtocol());
-      char str[] = "Rx";
-      sprintf(RemoteXY.text_01, "%s value %d bit: %d protocol: %d pulse: %d", str, value,bitlength,protocol,pulselength);
-      mySwitch.resetAvailable();
-      }
+  if (mySwitch.available()) {
+    value = mySwitch.getReceivedValue();
+    bitlength = mySwitch.getReceivedBitlength();
+    protocol = mySwitch.getReceivedProtocol();
+    pulselength = mySwitch.getReceivedDelay();
+    output(mySwitch.getReceivedValue(), mySwitch.getReceivedBitlength(), mySwitch.getReceivedDelay(), mySwitch.getReceivedRawdata(),mySwitch.getReceivedProtocol());
+    char str[] = "Rx";
+    sprintf(RemoteXY.text_01, "%s value %d bit: %d protocol: %d pulse: %d", str, value,bitlength,protocol,pulselength);
+    mySwitch.resetAvailable();
+  }
 }
 
 void nice()
@@ -213,6 +231,7 @@ for (int send_code = 0; send_code < 4096; send_code++) // цикли переб�
       Serial.println("Nice");
       Serial.println(send_code);
       SerialBT.println(send_code);
+      restarts();
     }
   }
 }
@@ -249,6 +268,7 @@ void came()
       Serial.println("Came");
       Serial.println(send_code);
       SerialBT.println(send_code);
+      restarts();
     }
   }
 }
