@@ -1,10 +1,6 @@
 //////////////////////////////////////////////
 //        RemoteXY include library          //
 //////////////////////////////////////////////
-
-// можете включить вывод отладочной информации в Serial на 115200
-//#define REMOTEXY__DEBUGLOG    
-
 // определение режима соединения и подключение библиотеки RemoteXY 
 #define REMOTEXY_MODE__ESP32CORE_BLE
 
@@ -14,7 +10,6 @@
 #define REMOTEXY_BLUETOOTH_NAME "IPhone(Egor)"
 #define REMOTEXY_ACCESS_PASSWORD "201272"
 
-
 #include <RemoteXY.h>
 
 // конфигурация интерфейса RemoteXY  
@@ -23,8 +18,8 @@ uint8_t RemoteXY_CONF[] =   // 89 bytes
   { 255,4,0,131,0,82,0,17,0,0,0,31,1,200,198,1,1,5,0,1,
   56,93,53,53,0,6,31,83,101,110,100,32,67,111,100,101,0,3,40,166,
   158,25,135,135,16,10,133,91,57,57,112,4,1,31,208,147,208,187,209,131,
-  209,136,208,184,208,187,208,186,208,176,0,31,67,255,24,206,5,0,2,26,
-  131,3,7,57,30,137,5,36,16 };
+  209,136,208,184,208,187,208,186,208,176,0,31,67,254,24,206,7,0,2,26,
+  131,3,4,67,34,124,4,36,16 };
   
 // структура определяет все переменные и события вашего интерфейса управления 
 struct {
@@ -64,26 +59,27 @@ int incoming;
 int speeds = 4;
 unsigned int freq;
 
-#define pulseAN 412                     // длительность импульса AN-Motors
+//#define pulseAN 412                     // длительность импульса AN-Motors
 //AN MOTORS
-volatile long c1 = 0;                   // переменная для отправки
-volatile long c2 = 0;                   // переменная для отправки
+//volatile long c1 = 0;                   // переменная для отправки
+//volatile long c2 = 0;                   // переменная для отправки
 
 
 
 void setup()
 {
   pinMode(txPin, OUTPUT);
-  RemoteXY_Init();
   Serial.begin(115200);
   SerialBT.begin("IPhone(Egor)");
   speeds = 4;
   freq = 1000;
   mySwitch.enableReceive(rxPin);
   mySwitch.enableTransmit(txPin);
-  Serial.println("A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical");
-  SerialBT.println("A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical");
-  char str[] = "A-Sniff,B-Nice,C-Came,D-AN-Motors,E-Stop: Vertical";
+  Serial.println("B-Sniff,C-Nice,D-Came: Vertical");
+  SerialBT.println("B-Sniff,C-Nice,D-Came: Vertical");
+  char str[] = "B-Sniff,C-Nice,D-Came: Vertical";
+  delay(1000);
+  RemoteXY_Init();
   strcpy(RemoteXY.text_01, str);
 }
 
@@ -98,45 +94,36 @@ void loop ()
       break;
     case 1:
       speeds = 2;
-      itoa(speeds, RemoteXY.text_01, 10);
       break;
     case 2:
       speeds = 3;
-      itoa(speeds, RemoteXY.text_01, 10);
       break;
     case 3:
       speeds = 4;
-      itoa(speeds, RemoteXY.text_01, 10);
       break;
     case 4:
       speeds = 5;
-      itoa(speeds, RemoteXY.text_01, 10);
       break;
     case 5:
       speeds = 6;
-      itoa(speeds, RemoteXY.text_01, 10);
       break;
     case 6:
       speeds = 7;
-      itoa(speeds, RemoteXY.text_01, 10);
       break;
   }
   switch (RemoteXY.select_2) {
     case 0:
-      priem();
       break;
     case 1:
+      priem();
+      break;
+    case 2:
       Serial.println("[+] Nice");
       nice();
       break;
-    case 2:
+    case 3:
       Serial.println("[+] Came");
       came();
-      break;
-    case 3:
-      Serial.println("[+] AN-Motors Dont work");
-      break;
-    case 4:
       break;
   }
   if(RemoteXY.btglush!=0) {
@@ -272,7 +259,7 @@ void came()
     }
   }
 }
-
+/*
 void SendANMotors(long c1, long c2) 
 {
   for (int j = 0; j < speeds; j++)  {
@@ -302,7 +289,6 @@ void SendANMotors(long c1, long c2)
   SerialBT.println(String(c1, HEX) + " " + String(c2, HEX));
 }
 
-
 void SendBit(byte b, int pulse) {
   if (b == 0) {
     digitalWrite(txPin, HIGH);        // 0
@@ -317,3 +303,4 @@ void SendBit(byte b, int pulse) {
     delayMicroseconds(pulse * 2);
   }
 }
+*/
