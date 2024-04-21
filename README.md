@@ -17,7 +17,7 @@ Have BT Serial message in terminal bluetooth app for detailed code
 
 Set choice mode - (A-Sniff,B-Nice,C-Came: Vertical)
 
-Set speed bruteforce - Slider; Higher - slow
+Set speed bruteforce - Slider; Higher - slower
 
 When start brutforce, app dont work, see code brut in bluetooth terminal app on phone.
 
