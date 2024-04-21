@@ -23,6 +23,8 @@ Send ! in bluetooth terminal and ESP restart.
 
 Send - or + in bluetooth terminal and Freq jummer +1000HZ or -1000HZ.
 
+BTMENU: (+ -)-JumFreq send (glON glOFF)-JumOff-ON came nice snif (2 4 7)-SpeedBrutf restart !-StopAll
+
 # Gallery
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/72d2a2b3-b5d7-468b-a660-cf7b30ba6b46)
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/e072969e-02dd-478c-9e48-cd535584f92b)
