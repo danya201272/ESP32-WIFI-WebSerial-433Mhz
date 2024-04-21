@@ -9,8 +9,6 @@ BT Name:Iphone(Егор)
 
 APP pass: 201272
 
-BT pin: 2012
-
 Serial (115200)
 
 Have BT Serial message in terminal bluetooth app for detailed code
