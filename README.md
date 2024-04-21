@@ -24,6 +24,6 @@ Send ! in bluetooth terminal and ESP restart.
 Send - or + in bluetooth terminal and Freq jummer +1000HZ or -1000HZ.
 
 # Gallery
-![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/7e077796-9fe4-49f7-bda6-f639aed3240f)
+![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/72d2a2b3-b5d7-468b-a660-cf7b30ba6b46)
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/2c8921cb-82dd-4dde-a16b-2b0e51b48dd7)
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/e072969e-02dd-478c-9e48-cd535584f92b)
