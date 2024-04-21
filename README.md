@@ -7,7 +7,7 @@ APP on phone: https://remotexy.com/ru/download/
 
 BT Name:Iphone(Егор)
 
-APP pass:201272
+APP pass: 201272
 
 BT pin: 2012
 
