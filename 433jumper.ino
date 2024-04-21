@@ -1,6 +1,10 @@
 //////////////////////////////////////////////
 //        RemoteXY include library          //
 //////////////////////////////////////////////
+
+// можете включить вывод отладочной информации в Serial на 115200
+//#define REMOTEXY__DEBUGLOG    
+
 // определение режима соединения и подключение библиотеки RemoteXY 
 #define REMOTEXY_MODE__ESP32CORE_BLE
 
@@ -10,25 +14,26 @@
 #define REMOTEXY_BLUETOOTH_NAME "IPhone(Egor)"
 #define REMOTEXY_ACCESS_PASSWORD "201272"
 
+
 #include <RemoteXY.h>
 
 // конфигурация интерфейса RemoteXY  
 #pragma pack(push, 1)  
 uint8_t RemoteXY_CONF[] =   // 89 bytes
   { 255,4,0,131,0,82,0,17,0,0,0,31,1,200,198,1,1,5,0,1,
-  56,93,53,53,0,6,31,83,101,110,100,32,67,111,100,101,0,3,40,166,
-  158,25,135,135,16,10,133,91,57,57,112,4,1,31,208,147,208,187,209,131,
-  209,136,208,184,208,187,208,186,208,176,0,31,67,254,24,206,7,0,2,26,
-  131,3,4,67,34,124,4,36,16 };
+  56,93,53,53,0,6,31,83,101,110,100,32,67,111,100,101,0,10,133,91,
+  57,57,112,4,1,31,208,147,208,187,209,131,209,136,208,184,208,187,208,186,
+  208,176,0,31,67,254,24,206,7,0,2,26,131,3,4,67,34,124,4,36,
+  16,4,46,161,150,26,128,135,26 };
   
 // структура определяет все переменные и события вашего интерфейса управления 
 struct {
 
     // input variables
   uint8_t sendcodes; // =1 если кнопка нажата, иначе =0
-  uint8_t select_1; // =0 если переключатель в положении A, =1 если в положении B, ...
   uint8_t btglush; // =1 если включено, иначе =0
   uint8_t select_2; // =0 если переключатель в положении A, =1 если в положении B, ...
+  int8_t slider_01; // oт 0 до 100
 
     // output variables
   char text_01[131]; // =строка UTF8 оканчивающаяся нулем
@@ -43,8 +48,9 @@ struct {
 //           END RemoteXY include          //
 /////////////////////////////////////////////
 
-#include "BluetoothSerial.h"
-BluetoothSerial SerialBT; // Объект для Bluetooth
+#include <BluetoothSerial.h>
+BluetoothSerial SerialBT;
+int incoming;
 
 #include <RCSwitch.h>
 RCSwitch mySwitch = RCSwitch();
@@ -53,34 +59,24 @@ long value;
 int bitlength;
 int protocol;
 int pulselength;
-int incoming;
 #define txPin 32  // Передатчик
 #define rxPin 33 // Приемник
-int speeds = 4;
-unsigned int freq;
-
-//#define pulseAN 412                     // длительность импульса AN-Motors
-//AN MOTORS
-//volatile long c1 = 0;                   // переменная для отправки
-//volatile long c2 = 0;                   // переменная для отправки
+int speeds = 4; // Brutforce speed
+unsigned int freq = 1000; // Freq Jummer
 
 
 
 void setup()
 {
+  RemoteXY_Init();
   pinMode(txPin, OUTPUT);
   Serial.begin(115200);
-  SerialBT.begin("IPhone(Egor)");
-  speeds = 4;
-  freq = 1000;
+  SerialBT.begin(REMOTEXY_BLUETOOTH_NAME);
   mySwitch.enableReceive(rxPin);
   mySwitch.enableTransmit(txPin);
-  Serial.println("B-Sniff,C-Nice,D-Came: Vertical");
-  SerialBT.println("B-Sniff,C-Nice,D-Came: Vertical");
-  char str[] = "B-Sniff,C-Nice,D-Came: Vertical";
-  delay(1000);
-  RemoteXY_Init();
+  char str[] = "A-Sniff,B-Nice,C-Came: Vertical";
   strcpy(RemoteXY.text_01, str);
+  RemoteXY.slider_01 = 60;
 }
 
 void loop ()
@@ -89,52 +85,43 @@ void loop ()
   if (RemoteXY.sendcodes!=0) {
     send();
   }
-  switch (RemoteXY.select_1) {
-    case 0:
-      break;
-    case 1:
-      speeds = 2;
-      break;
-    case 2:
-      speeds = 3;
-      break;
-    case 3:
-      speeds = 4;
-      break;
-    case 4:
-      speeds = 5;
-      break;
-    case 5:
-      speeds = 6;
-      break;
-    case 6:
-      speeds = 7;
-      break;
-  }
   switch (RemoteXY.select_2) {
     case 0:
-      break;
-    case 1:
       priem();
       break;
-    case 2:
-      Serial.println("[+] Nice");
+    case 1:
       nice();
+      RemoteXY.select_2 = 0;
+      break;
+    case 2:
+      came();
+      RemoteXY.select_2 = 0;
       break;
     case 3:
-      Serial.println("[+] Came");
-      came();
       break;
   }
   if(RemoteXY.btglush!=0) {
     tone(txPin, freq);
-    char str[] = "Jummer ON!";
-    sprintf(RemoteXY.text_01, "%s Freq is: %d Hz", str, freq);
   }
   else {
     noTone(txPin);
   }
   restarts();
+  checkslider();
+}
+
+void checkslider()
+{
+  int pos = RemoteXY.slider_01;
+  if (pos<=30) {
+    speeds = 2;
+  }
+  else if (pos<=60) {
+    speeds = 4;
+  }
+  else if (pos<=100) {
+    speeds = 7;
+  }
 }
 
 void restarts()
@@ -144,7 +131,9 @@ void restarts()
     incoming = SerialBT.read(); // Читаем, что получили
     if (incoming == 33)  // Если значение равно !
     {
-      ESP.restart();
+      RemoteXY.select_2 = 3;
+      RemoteXY.btglush = 0;
+      SerialBT.print("(+ -)-JumFreq send (glON glOFF)-JumOffON came nice snif (2 4 7)-SpeedBrutf !-StopAll");
     }
     if (incoming == 43)  // Если значение равно +
     {
@@ -157,7 +146,7 @@ void restarts()
       freq=freq-1000;
       SerialBT.print("JM:Freq-:  ");
       SerialBT.println(freq);
-    }  
+    }
   }
 }
 
@@ -215,11 +204,15 @@ for (int send_code = 0; send_code < 4096; send_code++) // цикли переб�
       }
       digitalWrite(txPin, LOW); // пилотный период
       delayMicroseconds(25200);
-      Serial.println("Nice");
-      Serial.println(send_code);
-      SerialBT.println(send_code);
-      restarts();
     }
+    RemoteXY_Handler ();
+    char str[] = "Nice";
+    sprintf(RemoteXY.text_01, "%s is %d", str, send_code);
+    SerialBT.println(send_code);
+    incoming = SerialBT.read();
+    if (incoming == 33) break; //!
+    if (RemoteXY.select_2 != 1) break;
+    checkslider();
   }
 }
 
@@ -252,55 +245,14 @@ void came()
       }
       digitalWrite(txPin, LOW); // пилотный период
       delayMicroseconds(11520);
-      Serial.println("Came");
-      Serial.println(send_code);
-      SerialBT.println(send_code);
-      restarts();
     }
+    RemoteXY_Handler ();
+    char str[] = "Came";
+    sprintf(RemoteXY.text_01, "%s is %d", str, send_code);
+    SerialBT.println(send_code);
+    incoming = SerialBT.read();
+    if (incoming == 33) break;//!
+    if (RemoteXY.select_2 != 2) break;
+    checkslider();
   }
 }
-/*
-void SendANMotors(long c1, long c2) 
-{
-  for (int j = 0; j < speeds; j++)  {
-    //отправка 12 начальных импульсов 0-1
-    for (int i = 0; i < 12; i++) {
-      delayMicroseconds(pulseAN);
-      digitalWrite(txPin, HIGH);
-      delayMicroseconds(pulseAN);
-      digitalWrite(txPin, LOW);
-    }
-    delayMicroseconds(pulseAN * 10);
-    //отправка первой части кода
-    for (int i = 32; i > 0; i--) {
-      SendBit(bitRead(c1, i - 1), pulseAN);
-    }
-    //отправка второй части кода
-    for (int i = 32; i > 0; i--) {
-      SendBit(bitRead(c2, i - 1), pulseAN);
-    }
-    //отправка бит, которые означают батарею и флаг повтора
-    SendBit(1, pulseAN);
-    SendBit(1, pulseAN);
-    delayMicroseconds(pulseAN * 39);
-  }
-  Serial.println("AN-Motors");
-  Serial.println(String(c1, HEX) + " " + String(c2, HEX));
-  SerialBT.println(String(c1, HEX) + " " + String(c2, HEX));
-}
-
-void SendBit(byte b, int pulse) {
-  if (b == 0) {
-    digitalWrite(txPin, HIGH);        // 0
-    delayMicroseconds(pulse * 2);
-    digitalWrite(txPin, LOW);
-    delayMicroseconds(pulse);
-  }
-  else {
-    digitalWrite(txPin, HIGH);        // 1
-    delayMicroseconds(pulse);
-    digitalWrite(txPin, LOW);
-    delayMicroseconds(pulse * 2);
-  }
-}
-*/
