@@ -6,8 +6,8 @@ Project interface: https://remotexy.com/ru/editor/e6144dbbfd8eaeae5f091fcc759ed9
 APP on phone: https://remotexy.com/ru/download/
 
 BT Name:Iphone(Егор)
-
-BT pin: 201272
+APP pass:201272
+BT pin: 2012
 
 Serial (115200)
 
