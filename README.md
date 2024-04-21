@@ -21,8 +21,6 @@ Set speed bruteforce - Slider; Higher - slower
 
 When start brutforce, app dont work, see code brut in bluetooth terminal app on phone.
 
-Send ! in bluetooth terminal and ESP restart.
-
 Send - or + in bluetooth terminal and Freq jummer +1000HZ or -1000HZ.
 
 BTMENU: (+ -)-JumFreq send (glON glOFF)-JumOff-ON came nice snif (2 4 7)-SpeedBrutf !-StopAll
