@@ -131,7 +131,7 @@ void checkslider()
     speeds = 1;
   }
   else if (pos <= 30) {
-    speeds = 3;
+    speeds = 2;
   }
   else if (pos <= 60) {
     speeds = 4;
