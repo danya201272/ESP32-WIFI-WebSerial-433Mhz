@@ -10,7 +10,7 @@ Wifi-pass: #define REMOTEXY_WIFI_PASSWORD
 
 APP pass: #define REMOTEXY_ACCESS_PASSWORD
 
-Serial (115200)
+Serial (115200) If more received ,set lower
 
 WebSerial Sniff Info Full: http://(ESP_ip_adress)/webserial
 
