@@ -130,13 +130,16 @@ void checkslider()
   if (pos == 0) {
     speeds = 1;
   }
-  else if (pos<=30) {
-    speeds = 2;
+  else if (pos <= 30) {
+    speeds = 3;
   }
-  else if (pos<=60) {
+  else if (pos <= 60) {
     speeds = 4;
   }
-  else if (pos<=100) {
+  else if (pos <= 99) {
+    speeds = 6;
+  }
+  else if (pos == 100) {
     speeds = 8;
   }
 }
@@ -204,7 +207,7 @@ for (int send_code = 0; send_code < 4096; send_code++) // цикли переб�
       digitalWrite(txPin, LOW); // пилотный период
       delayMicroseconds(25200);
     }
-    RemoteXY_Handler ();
+    RemoteXY_Handler();
     char str[] = "Nice";
     sprintf(RemoteXY.text_01, "%s is %d", str, send_code);
     if (RemoteXY.select_2 != 1) break;
@@ -242,7 +245,7 @@ void came()
       digitalWrite(txPin, LOW); // пилотный период
       delayMicroseconds(11520);
     }
-    RemoteXY_Handler ();
+    RemoteXY_Handler();
     char str[] = "Came";
     sprintf(RemoteXY.text_01, "%s is %d", str, send_code);
     if (RemoteXY.select_2 != 2) break;
