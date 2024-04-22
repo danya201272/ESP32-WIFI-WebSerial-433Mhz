@@ -6,12 +6,14 @@
 //#define REMOTEXY__DEBUGLOG    
 
 // определение режима соединения и подключение библиотеки RemoteXY 
-#define REMOTEXY_MODE__ESP32CORE_BLE
+#define REMOTEXY_MODE__ESP32CORE_WIFI_POINT
 
-#include <BLEDevice.h>
+#include <WiFi.h>
 
 // настройки соединения 
-#define REMOTEXY_BLUETOOTH_NAME "IPhone(Egor)"
+#define REMOTEXY_WIFI_SSID "Keenetic-2012"
+#define REMOTEXY_WIFI_PASSWORD "D201272d"
+#define REMOTEXY_SERVER_PORT 6377
 #define REMOTEXY_ACCESS_PASSWORD "201272"
 
 
@@ -47,10 +49,9 @@ struct {
 /////////////////////////////////////////////
 //           END RemoteXY include          //
 /////////////////////////////////////////////
-
-#include <BluetoothSerial.h>
-BluetoothSerial SerialBT;
-int incoming;
+#include <ESPAsyncWebServer.h>
+#include <WebSerial.h>
+AsyncWebServer server(80);
 
 #include <RCSwitch.h>
 RCSwitch mySwitch = RCSwitch();
@@ -63,26 +64,29 @@ int pulselength;
 #define rxPin 33 // Приемник
 int speeds = 4; // Brutforce speed
 unsigned int freq = 1000; // Freq Jummer
-
-
+bool jumstate = false;
 
 void setup()
 {
   RemoteXY_Init();
   pinMode(txPin, OUTPUT);
   Serial.begin(115200);
-  SerialBT.begin(REMOTEXY_BLUETOOTH_NAME);
+  Serial.setTimeout(20);
   mySwitch.enableReceive(rxPin);
   mySwitch.enableTransmit(txPin);
   char str[] = "A-Sniff,B-Nice,C-Came: Vertical";
   strcpy(RemoteXY.text_01, str);
   RemoteXY.slider_01 = 60;
+  Serial.println(WiFi.localIP());
+  WebSerial.begin(&server);
+  server.begin();
 }
 
 void loop ()
 {
   RemoteXY_Handler ();
   if (RemoteXY.sendcodes!=0) {
+    RemoteXY.btglush=0;
     send();
   }
   switch (RemoteXY.select_2) {
@@ -90,63 +94,50 @@ void loop ()
       priem();
       break;
     case 1:
+      RemoteXY.btglush=0;
       nice();
       RemoteXY.select_2 = 0;
       break;
     case 2:
+      RemoteXY.btglush=0;
       came();
       RemoteXY.select_2 = 0;
       break;
     case 3:
       break;
   }
+  jummers();
+  checkslider();
+}
+
+void jummers()
+{
   if(RemoteXY.btglush!=0) {
     tone(txPin, freq);
+    jumstate = true;
   }
   else {
-    noTone(txPin);
+    if (jumstate == true){
+      noTone(txPin);
+      jumstate = false;
+    }
   }
-  restarts();
-  checkslider();
 }
 
 void checkslider()
 {
   int pos = RemoteXY.slider_01;
-  if (pos<=30) {
+  if (pos == 0) {
+    speeds = 1;
+  }
+  else if (pos<=30) {
     speeds = 2;
   }
   else if (pos<=60) {
     speeds = 4;
   }
   else if (pos<=100) {
-    speeds = 7;
-  }
-}
-
-void restarts()
-{
-  if (SerialBT.available()) // Проверяем, не получили ли мы что-либо от Bluetooth модуля
-  {
-    incoming = SerialBT.read(); // Читаем, что получили
-    if (incoming == 33)  // Если значение равно !
-    {
-      RemoteXY.select_2 = 3;
-      RemoteXY.btglush = 0;
-      SerialBT.print("(+ -)-JumFreq send (glON glOFF)-JumOffON came nice snif (2 4 7)-SpeedBrutf !-StopAll");
-    }
-    if (incoming == 43)  // Если значение равно +
-    {
-      freq=freq+1000;
-      SerialBT.print("JM:Freq+:  ");
-      SerialBT.println(freq);
-    }
-    if (incoming == 45)  // Если значение равно -
-    {
-      freq=freq-1000;
-      SerialBT.print("JM:Freq-:  ");
-      SerialBT.println(freq);
-    }
+    speeds = 8;
   }
 }
 
@@ -159,6 +150,14 @@ void send()
   RemoteXY_delay(1);
   char str[] = "Send";
   sprintf(RemoteXY.text_01, "%s value %d bit: %d protocol: %d pulse: %d", str, value,bitlength,protocol,pulselength);
+  WebSerial.print("Send ");
+  WebSerial.print(value);
+  WebSerial.print(" Bit: ");
+  WebSerial.print(bitlength);
+  WebSerial.print(" Prot: ");
+  WebSerial.print(protocol);
+  WebSerial.print(" Pulse: ");
+  WebSerial.println(pulselength);
 }
 
 void priem()
@@ -208,9 +207,6 @@ for (int send_code = 0; send_code < 4096; send_code++) // цикли переб�
     RemoteXY_Handler ();
     char str[] = "Nice";
     sprintf(RemoteXY.text_01, "%s is %d", str, send_code);
-    SerialBT.println(send_code);
-    incoming = SerialBT.read();
-    if (incoming == 33) break; //!
     if (RemoteXY.select_2 != 1) break;
     checkslider();
   }
@@ -249,9 +245,6 @@ void came()
     RemoteXY_Handler ();
     char str[] = "Came";
     sprintf(RemoteXY.text_01, "%s is %d", str, send_code);
-    SerialBT.println(send_code);
-    incoming = SerialBT.read();
-    if (incoming == 33) break;//!
     if (RemoteXY.select_2 != 2) break;
     checkslider();
   }
