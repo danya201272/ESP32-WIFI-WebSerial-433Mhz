@@ -16,7 +16,7 @@ APP pass: #define REMOTEXY_ACCESS_PASSWORD
 
 Serial (115200) If more received ,set lower
 
-WebSerial Sniff Info Full: http://(ESP_ip_adress)/webserial/
+WebSerial Sniff Info Full: http://(ESP_ip_adress)/webserial
 
 Set choice mode - (A-Sniff,B-Nice,C-Came: Vertical)
 
