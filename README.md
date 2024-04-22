@@ -5,23 +5,14 @@ Project interface: https://remotexy.com/ru/editor/e6144dbbfd8eaeae5f091fcc759ed9
 
 APP on phone: https://remotexy.com/ru/download/
 
-BT Name:Iphone(Егор)
+Wifi Name: #define REMOTEXY_WIFI_SSID
+Wifi-pass: #define REMOTEXY_WIFI_PASSWORD
 
-APP pass: 201272
+APP pass: #define REMOTEXY_ACCESS_PASSWORD
 
 Serial (115200)
 
-Have BT Serial message in terminal bluetooth app for detailed code
-
 Set choice mode - (A-Sniff,B-Nice,C-Came: Vertical)
-
-Set speed bruteforce - Slider; Higher - slow brutf
-
-When start brutforce, app dont work, see code brut in bluetooth terminal app on phone.
-
-Send - or + in bluetooth terminal and Freq jummer +1000HZ or -1000HZ.
-
-BTMENU: - + !-StopAll
 
 # Gallery
 ![image](https://github.com/danya201272/ESP32-WIFI-RF443/assets/36302863/72d2a2b3-b5d7-468b-a660-cf7b30ba6b46)
