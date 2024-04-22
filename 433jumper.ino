@@ -140,7 +140,8 @@ void checkslider()
     speeds = 6;
   }
   else if (pos == 100) {
-    speeds = 8;
+    speeds = 10;
+    RemoteXY_delay(3500);
   }
 }
 
