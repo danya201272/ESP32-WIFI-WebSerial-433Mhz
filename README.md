@@ -6,6 +6,7 @@ Project interface: https://remotexy.com/ru/editor/e6144dbbfd8eaeae5f091fcc759ed9
 APP on phone: https://remotexy.com/ru/download/
 
 Wifi Name: #define REMOTEXY_WIFI_SSID
+
 Wifi-pass: #define REMOTEXY_WIFI_PASSWORD
 
 APP pass: #define REMOTEXY_ACCESS_PASSWORD
