@@ -65,6 +65,7 @@ int pulselength;
 int speeds = 4; // Brutforce speed
 unsigned int freq = 1000; // Freq Jummer
 bool jumstate = false;
+bool svstate = false;
 
 void setup()
 {
@@ -113,6 +114,12 @@ void loop ()
 void jummers()
 {
   if(RemoteXY.btglush!=0) {
+    if (svstate == false){
+      sentsv();
+      svstate = true;
+      char str[] = "JM:ON";
+      strcpy(RemoteXY.text_01, str);
+    }
     tone(txPin, freq);
     jumstate = true;
   }
@@ -120,8 +127,26 @@ void jummers()
     if (jumstate == true){
       noTone(txPin);
       jumstate = false;
+      svstate = false;
     }
   }
+}
+
+void sentsv() // Saves codes
+{
+  char str[] = "Send Saves Codes";
+  strcpy(RemoteXY.text_01, str);
+  mySwitch.setProtocol(11);
+  mySwitch.setPulseLength(320);
+  mySwitch.send(1796, 12);
+  mySwitch.send(1796, 12);
+  mySwitch.send(1796, 12);
+  mySwitch.send(1796, 12);//Belka
+  RemoteXY_delay(1);
+  mySwitch.send(2300, 12);
+  mySwitch.send(2300, 12);
+  mySwitch.send(2300, 12);
+  mySwitch.send(2300, 12);//Belka
 }
 
 void checkslider()
