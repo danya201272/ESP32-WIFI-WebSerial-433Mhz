@@ -128,6 +128,8 @@ void jummers()
       noTone(txPin);
       jumstate = false;
       svstate = false;
+      char str[] = "JM:OFF";
+      strcpy(RemoteXY.text_01, str);
     }
   }
 }
